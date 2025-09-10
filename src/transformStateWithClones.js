@@ -8,21 +8,25 @@
  */
 function transformStateWithClones(state, actions) {
   const statesHistory = [];
-  let currentState = { ...state }; // начальная копия
+  let currentState = { ...state };
 
   for (const action of actions) {
     switch (action.type) {
       case 'addProperties': {
-        const stateCopy = { ...currentState, ...action.extraData };
+        const extraData = action.extraData || {};
+        const stateCopy = { ...currentState, ...extraData };
 
         currentState = stateCopy;
         break;
       }
 
       case 'removeProperties': {
+        const keysToRemove = Array.isArray(action.keysToRemove)
+          ? action.keysToRemove
+          : [];
         const stateCopy = { ...currentState };
 
-        for (const key of action.keysToRemove) {
+        for (const key of keysToRemove) {
           delete stateCopy[key];
         }
         currentState = stateCopy;
@@ -35,10 +39,10 @@ function transformStateWithClones(state, actions) {
       }
 
       default:
-        throw new Error(`Unknown action type: ${action.type}`);
+        break;
     }
 
-    statesHistory.push(currentState);
+    statesHistory.push({ ...currentState });
   }
 
   return statesHistory;
